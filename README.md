@@ -1,0 +1,11 @@
+# Registro de atividades
+- **Aula 1**
+	- Organização do projeto
+	- Configuração do **pyproject.toml**
+	- Introdução a testes automatizados
+	- Primeira vez rodando o app em modo de desenvolvimento
+- **Aula 2**
+	- Revisitando conceitos fundamentais do desenvolvimento web
+	- Introdução a **schemas**
+	- Criação do meu endpoint `/hello`
+	- Teste do meu endpoint
