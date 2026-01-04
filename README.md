@@ -9,3 +9,8 @@
 	- Introdução a **schemas**
 	- Criação do meu endpoint `/hello`
 	- Teste do meu endpoint
+- **Aula 3**
+  - Implementação das rotas CRUD na API
+  - Testes realizados para todas as rotas e situações de erro 404
+  - Os testes são interdependentes aqui, um teste depende do outro (será resolvido)
+  - Testes práticos simulando banco de dados
