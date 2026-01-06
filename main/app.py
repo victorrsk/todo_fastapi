@@ -37,10 +37,7 @@ def read_users():
 )
 def read_user(user_id: int):
     if user_id < 1 or user_id > len(database):
-        raise HTTPException(
-            detail='user not found',
-            status_code=404
-        )
+        raise HTTPException(detail='user not found', status_code=404)
     return database[user_id - 1]
 
 
