@@ -1,4 +1,3 @@
-
 from sqlalchemy import select
 
 from models.models_db import User
@@ -16,9 +15,10 @@ def test_create_user(session, mock_db_time):
     # a forma mais limpa de fazer isso seria usando asdict() do dataclass
     # mas eu usei declarative base e não @mapped_as_dataclass no registry
     # na criação do modelo
-    breakpoint()
+
     assert user.id == 1
     assert user.username == 'teste'
     assert user.email == 'teste@email.com'
     assert user.password == 'teste123'
     assert user.created_at == time
+    assert user.updated_at == time
