@@ -14,3 +14,7 @@
   - Testes realizados para todas as rotas e situações de erro 404
   - Os testes são interdependentes aqui, um teste depende do outro (será resolvido)
   - Testes práticos simulando banco de dados
+- **Aula 4**
+  - Criação de tabelas usando o ORM do SQLAlchemy
+  - Testando criação de registro com events do SQLAlchemy
+  - Primeira migração feita com alembic
