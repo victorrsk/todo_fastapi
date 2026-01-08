@@ -54,6 +54,7 @@ def create_user(user: UserSchema):
     from sqlalchemy.orm import Session
     from models.models_db import User
     from settings import Settings
+    from datetime import datetime
     
     engine = create_engine(Settings().DATABASE_URL)
     session = Session(engine)
@@ -63,10 +64,10 @@ def create_user(user: UserSchema):
     if user_db:
         raise HTTPException(detail='user already exists', status_code=HTTPStatus.CONFLICT)
 
-    user_db = User(username=user.username, email=user.email, password=user.password)
+    user_db = User(username=user.username, email=user.email, password=user.password) #created_at=datetime.utcnow(), updated_at=datetime.utcnow())
     session.add(user_db)
     session.commit()
-
+    session.refresh(user_db)
     return user_db
 
 @app.put(
