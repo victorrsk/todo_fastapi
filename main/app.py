@@ -50,10 +50,24 @@ def read_user(user_id: int):
 
 @app.post('/users/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
 def create_user(user: UserSchema):
-    user_with_id = UserDB(**user.model_dump(), id=len(database) + 1)
-    database.append(user_with_id)
-    return user_with_id
+    from sqlalchemy import create_engine, select
+    from sqlalchemy.orm import Session
+    from models.models_db import User
+    from settings import Settings
+    
+    engine = create_engine(Settings().DATABASE_URL)
+    session = Session(engine)
+    
+    # básico
+    user_db = session.scalar(select(User).where(User.username == user.username))
+    if user_db:
+        raise HTTPException(detail='user already exists', status_code=HTTPStatus.CONFLICT)
 
+    user_db = User(username=user.username, email=user.email, password=user.password)
+    session.add(user_db)
+    session.commit()
+
+    return user_db
 
 @app.put(
     '/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
