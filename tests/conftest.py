@@ -9,7 +9,7 @@ from sqlalchemy.pool import StaticPool
 
 from database import get_session
 from main.app import app
-from models.models_db import Base
+from models.models_db import Base, User
 
 
 # fixture que retorna um client para testes de rotas da API
@@ -64,3 +64,13 @@ def _mock_db_time(model, time=datetime(2026, 1, 1)):
 @pytest.fixture
 def mock_db_time():
     return _mock_db_time
+
+
+@pytest.fixture
+def user(session):
+    user = User(username='test', email='test@email.com', password='test123')
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    return user
