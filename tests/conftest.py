@@ -5,21 +5,35 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
 
+from database import get_session
 from main.app import app
 from models.models_db import Base
 
 
 # fixture que retorna um client para testes de rotas da API
 @pytest.fixture
-def client():
-    return TestClient(app)
+def client(session):
+    def get_session_override():
+        return session
+
+    with TestClient(app) as client:
+        app.dependency_overrides[get_session] = get_session_override
+
+        yield client
+
+    app.dependency_overrides.clear()
 
 
 # fixture para criação de tabela e abertura de session para operações no bd
 @pytest.fixture
 def session():
-    engine = create_engine('sqlite:///:memory:')
+    engine = create_engine(
+        'sqlite:///:memory:',
+        connect_args={'check_same_thread': False},
+        poolclass=StaticPool,
+    )
     Base.metadata.create_all(engine)
 
     with Session(engine) as session:
