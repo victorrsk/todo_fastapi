@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from schema.schemas import HTML_HELLO
+from schema.schemas import HTML_HELLO, UserPublic
 
 
 def test_root_should_return_hello_world(client):
@@ -39,11 +39,10 @@ def test_read_zero_users(client):
 
 def test_read_users_with_user(client, user):
     response = client.get('/users/')
-    assert response.json() == {
-        'users': [
-            {'id': user.id, 'username': user.username, 'email': user.email}
-        ]
-    }
+    # valida o user de acordo com o schema de UserPublic
+    # e converte em um dicionário
+    user_schema = UserPublic.model_validate(user).model_dump()
+    assert response.json() == {'users': [user_schema]}
     assert response.status_code == HTTPStatus.OK
 
 

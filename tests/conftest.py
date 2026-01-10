@@ -40,6 +40,7 @@ def session():
         yield session
 
     Base.metadata.drop_all(engine)
+    engine.dispose()
 
 
 # usado para inserir um created_at "falso" no bd
