@@ -10,15 +10,12 @@ from models.models_db import User
 from schema.schemas import (
     HTML_HELLO,
     Message,
-    UserDB,
     UserList,
     UserPublic,
     UserSchema,
 )
 
 app = FastAPI()
-
-database: list[UserDB] = []
 
 
 @app.get('/', status_code=HTTPStatus.OK, response_model=Message)
@@ -84,30 +81,38 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
     return user_db
 
 
-# FIXME inserir um id inválido ou email/username já existente ainda não foi
-# tratado corretamente
 @app.put(
     '/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
 )
 def update_user(
     user_id: int, user: UserSchema, session: Session = Depends(get_session)
 ):
-    user_updt = session.scalar(select(User).where(User.id == user_id))
-    user_updt.username = user.username
-    user_updt.email = user.email
-    user_updt.password = user.password
-    session.add(user_updt)
-    session.commit()
-    session.refresh(user_updt)
-    return user_updt
-
-
-@app.delete('/users/{user_id}', status_code=HTTPStatus.OK)
-def delete_user(user_id: int):
-    if user_id < 1 or user_id > len(database):
+    user_db = session.scalar(select(User).where(User.id == user_id))
+    if not user_db:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='user not found'
+            detail='user not found',
+            status_code=HTTPStatus.NOT_FOUND
         )
-    del database[user_id - 1]
+    # Sobrescreve os dados originais do banco com os dados recebidos da API
+    user_db.username = user.username
+    user_db.email = user.email
+    user_db.password = user.password
 
-    return {'message': 'user deleted'}
+    session.add(user_db)
+    session.commit()
+    session.refresh(user_db)
+    return user_db
+
+
+@app.delete('/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
+def delete_user(user_id: int, session: Session = Depends(get_session)):
+    user_db = session.scalar(select(User).where(User.id == user_id))
+    if not user_db:
+        raise HTTPException(
+            detail='user not found',
+            status_code=HTTPStatus.NOT_FOUND
+        )
+    session.delete(user_db)
+    session.commit()
+
+    return user_db
