@@ -18,3 +18,7 @@
   - Criação de tabelas usando o ORM do SQLAlchemy
   - Testando criação de registro com events do SQLAlchemy
   - Primeira migração feita com alembic
+- **Aula 5**
+  - Integração de todas as rotas da API com banco de dados (SQLite3)
+  - Testes de todas as rotas e situações de conflito entre dados
+  - Introdução a injeção de dependências
