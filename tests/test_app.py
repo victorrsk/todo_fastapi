@@ -32,6 +32,32 @@ def test_create_user(client):
     assert response.status_code == HTTPStatus.CREATED
 
 
+def test_create_user_integrity_error_username(client, user):
+    response = client.post(
+        '/users/',
+        json={
+            'username': 'test',
+            'email': 'test2@email.com',
+            'password': 'test123',
+        },
+    )
+    assert response.json() == {'detail': 'username already in use'}
+    assert response.status_code == HTTPStatus.CONFLICT
+
+
+def test_create_user_integrity_error_email(client, user):
+    response = client.post(
+        '/users/',
+        json={
+            'username': 'new_name',
+            'email': 'test@email.com',
+            'password': 'test123',
+        },
+    )
+    assert response.json() == {'detail': 'email already in use'}
+    assert response.status_code == HTTPStatus.CONFLICT
+
+
 def test_read_zero_users(client):
     response = client.get('/users')
     assert response.json() == {'users': []}
@@ -63,7 +89,49 @@ def test_update_user(client, user):
     assert response.status_code == HTTPStatus.OK
 
 
-def test_update_user_404(client):
+def test_update_user_integrity_error_username(client, user):
+    client.post(
+        '/users/',
+        json={
+            'username': 'walter',
+            'email': 'walter@email.com',
+            'password': 'w1234',
+        },
+    )
+    response = client.put(
+        f'/users/{user.id}',
+        json={
+            'username': 'walter',
+            'email': 'walter@email.com',
+            'password': 'test123',
+        },
+    )
+    assert response.status_code == HTTPStatus.CONFLICT
+    assert response.json() == {'detail': 'username already in use'}
+
+
+def test_update_user_integrity_error_email(client, user):
+    client.post(
+        '/users/',
+        json={
+            'username': 'walter',
+            'email': 'walter@email.com',
+            'password': 'w1234',
+        },
+    )
+    response = client.put(
+        f'/users/{user.id}',
+        json={
+            'username': 'new_name',
+            'email': 'walter@email.com',
+            'password': 'test123',
+        },
+    )
+    assert response.status_code == HTTPStatus.CONFLICT
+    assert response.json() == {'detail': 'email already in use'}
+
+
+def test_update_user_should_return_not_found(client):
     response = client.put(
         '/users/2',
         json={
@@ -76,25 +144,29 @@ def test_update_user_404(client):
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-def test_read_user(client):
-    response = client.get('/users/1')
+def test_read_user(client, user):
+    response = client.get(f'/users/{user.id}')
     assert response.json() == {
         'id': 1,
-        'username': 'victor_novo',
-        'email': 'emailnovo@email.com',
+        'username': 'test',
+        'email': 'test@email.com',
     }
 
 
-def test_read_user_404(client):
+def test_read_user_should_return_not_found(client):
     response = client.get('/users/2')
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-def test_delete_user(client):
-    response = client.delete('/users/1')
-    assert response.json() == {'message': 'user deleted'}
+def test_delete_user(client, user):
+    response = client.delete(f'/users/{user.id}')
+    assert response.json() == {
+        'id': 1,
+        'username': 'test',
+        'email': 'test@email.com',
+    }
 
 
-def test_delete_user_404(client):
+def test_delete_user__should_return_not_found(client):
     response = client.delete('/users/2')
     assert response.status_code == HTTPStatus.NOT_FOUND
