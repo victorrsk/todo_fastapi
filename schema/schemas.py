@@ -38,3 +38,8 @@ HTML_HELLO = """
         </body>
     </html>
 """
+
+
+class TokenSchema(BaseModel):
+    access_token: str
+    token_type: str

@@ -1,7 +1,8 @@
 from http import HTTPStatus
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -10,10 +11,12 @@ from models.models_db import User
 from schema.schemas import (
     HTML_HELLO,
     Message,
+    TokenSchema,
     UserList,
     UserPublic,
     UserSchema,
 )
+from security import get_pwd_hash, verify_pwd
 
 app = FastAPI()
 
@@ -63,7 +66,9 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
         raise_unique_fields_error(user, user_db)
 
     user_db = User(
-        username=user.username, email=user.email, password=user.password
+        username=user.username,
+        email=user.email,
+        password=get_pwd_hash(user.password),
     )
     session.add(user_db)
     session.commit()
@@ -91,7 +96,7 @@ def update_user(
     # Sobrescreve os dados originais do banco com os dados recebidos da API
     user_db.username = user.username
     user_db.email = user.email
-    user_db.password = user.password
+    user_db.password = get_pwd_hash(user.password)
 
     session.add(user_db)
     session.commit()
@@ -110,3 +115,29 @@ def delete_user(user_id: int, session: Session = Depends(get_session)):
         session.commit()
 
     return user_db
+
+
+@app.post('/token/', response_model=TokenSchema)
+def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    session: Session = Depends(get_session),
+):
+    user = session.scalar(select(User).where(User.email == form_data.username))
+
+    # verifica se o email passado é válido
+    if not user:
+        raise HTTPException(
+            detail='incorrect email or password',
+            status_code=HTTPStatus.UNAUTHORIZED,
+        )
+
+    # verifica se a senha passada corresponde ao hash no banco
+    # a mensagem de ambos é igual para evitar que não seja possível saber
+    # que uma senha existente não corresponde ao email fornecido,
+    # evitando que outros emails sejam inseridos para tentar fazer
+    # login com a senha
+    if not verify_pwd(form_data.password, user.password):
+        raise HTTPException(
+            detail='incorrect email or password',
+            status_code=HTTPStatus.UNAUTHORIZED,
+        )
