@@ -16,7 +16,12 @@ from schema.schemas import (
     UserPublic,
     UserSchema,
 )
-from security import get_pwd_hash, verify_pwd
+from security import (
+    create_access_token,
+    get_current_user,
+    get_pwd_hash,
+    verify_pwd,
+)
 
 app = FastAPI()
 
@@ -35,6 +40,7 @@ def hello():
 def read_users(
     # traz no máximo 10 registros
     session: Session = Depends(get_session),
+    current_user=Depends(get_current_user),
     limit: int = 10,
     offset: int = 0,
 ):
@@ -141,3 +147,6 @@ def login_for_access_token(
             detail='incorrect email or password',
             status_code=HTTPStatus.UNAUTHORIZED,
         )
+
+    access_token = create_access_token(data={'sub': user.email})
+    return {'access_token': access_token, 'token_type': 'Bearer'}

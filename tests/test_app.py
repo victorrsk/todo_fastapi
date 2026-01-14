@@ -1,5 +1,8 @@
 from http import HTTPStatus
 
+from sqlalchemy import select
+
+from models.models_db import User
 from schema.schemas import HTML_HELLO, UserPublic
 
 
@@ -58,13 +61,24 @@ def test_create_user_integrity_error_email(client, user):
     assert response.status_code == HTTPStatus.CONFLICT
 
 
-def test_read_zero_users(client):
-    response = client.get('/users')
+# teste descontinuado, a inserção da autenticação fez com que o teste
+# perdesse seu sentido
+"""def test_read_zero_users(client, session, token):
+    user_db = session.scalar(select(User).where(User.id == 1))
+    session.delete(user_db)
+    session.commit()
+
+    response = client.get(
+        '/users', headers={'Authorization': f'Bearer {token}'}
+    )
     assert response.json() == {'users': []}
+"""
 
 
-def test_read_users_with_user(client, user):
-    response = client.get('/users/')
+def test_read_users_with_user(client, user, token):
+    response = client.get(
+        '/users/', headers={'Authorization': f'Bearer {token}'}
+    )
     # valida o user de acordo com o schema de UserPublic
     # e converte em um dicionário
     user_schema = UserPublic.model_validate(user).model_dump()
@@ -170,3 +184,13 @@ def test_delete_user(client, user):
 def test_delete_user__should_return_not_found(client):
     response = client.delete('/users/2')
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_get_token(client, user):
+    response = client.post(
+        '/token/', data={'username': user.email, 'password': user.clean_pwd}
+    )
+    token = response.json()
+    assert response.status_code == HTTPStatus.OK
+    assert token['token_type'] == 'Bearer'
+    assert 'access_token' in token.keys()

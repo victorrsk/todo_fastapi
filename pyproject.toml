@@ -12,6 +12,7 @@ dependencies = [
     "pyjwt>=2.10.1",
     "python-multipart>=0.0.20",
     "sqlalchemy>=2.0.45",
+    "tzdata>=2025.3",
 ]
 
 [dependency-groups]

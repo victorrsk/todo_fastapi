@@ -10,6 +10,7 @@ from sqlalchemy.pool import StaticPool
 from database import get_session
 from main.app import app
 from models.models_db import Base, User
+from security import get_pwd_hash
 
 
 # fixture que retorna um client para testes de rotas da API
@@ -69,9 +70,31 @@ def mock_db_time():
 
 @pytest.fixture
 def user(session):
-    user = User(username='test', email='test@email.com', password='test123')
+
+    password = 'test123'
+
+    user = User(
+        username='test',
+        email='test@email.com',
+        password=get_pwd_hash(password),
+    )
+
     session.add(user)
     session.commit()
     session.refresh(user)
+    # salva a senha limpa para comparar com o hash nos testes de token
+    user.clean_pwd = password
 
     return user
+
+
+@pytest.fixture
+def token(client, user):
+    # automaticamente insere um registro no banco de dados
+    # usando a fixture user
+    response = client.post(
+        '/token', data={'username': user.email, 'password': user.clean_pwd}
+    )
+
+    _token = response.json()['access_token']
+    return _token
