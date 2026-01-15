@@ -1,8 +1,5 @@
 from http import HTTPStatus
 
-from sqlalchemy import select
-
-from models.models_db import User
 from schema.schemas import HTML_HELLO, UserPublic
 
 
@@ -86,7 +83,7 @@ def test_read_users_with_user(client, user, token):
     assert response.status_code == HTTPStatus.OK
 
 
-def test_update_user(client, user):
+def test_update_user(client, user, token):
     response = client.put(
         '/users/1',
         json={
@@ -94,6 +91,7 @@ def test_update_user(client, user):
             'email': 'new_email@email.com',
             'password': 'test123',
         },
+        headers={'Authorization': f'Bearer {token}'},
     )
     assert response.json() == {
         'id': 1,
@@ -103,7 +101,7 @@ def test_update_user(client, user):
     assert response.status_code == HTTPStatus.OK
 
 
-def test_update_user_integrity_error_username(client, user):
+def test_update_user_integrity_error_username(client, user, token):
     client.post(
         '/users/',
         json={
@@ -119,12 +117,13 @@ def test_update_user_integrity_error_username(client, user):
             'email': 'walter@email.com',
             'password': 'test123',
         },
+        headers={'Authorization': f'Bearer {token}'},
     )
     assert response.status_code == HTTPStatus.CONFLICT
     assert response.json() == {'detail': 'username already in use'}
 
 
-def test_update_user_integrity_error_email(client, user):
+def test_update_user_integrity_error_email(client, user, token):
     client.post(
         '/users/',
         json={
@@ -140,12 +139,13 @@ def test_update_user_integrity_error_email(client, user):
             'email': 'walter@email.com',
             'password': 'test123',
         },
+        headers={'Authorization': f'Bearer {token}'},
     )
     assert response.status_code == HTTPStatus.CONFLICT
     assert response.json() == {'detail': 'email already in use'}
 
 
-def test_update_user_should_return_not_found(client):
+def test_update_user_should_return_not_found(client, token):
     response = client.put(
         '/users/2',
         json={
@@ -153,9 +153,10 @@ def test_update_user_should_return_not_found(client):
             'email': 'emailnovo@email.com',
             'password': '123456',
         },
+        headers={'Authorization': f'Bearer {token}'},
     )
 
-    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.status_code == HTTPStatus.FORBIDDEN
 
 
 def test_read_user(client, user):
@@ -172,8 +173,10 @@ def test_read_user_should_return_not_found(client):
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-def test_delete_user(client, user):
-    response = client.delete(f'/users/{user.id}')
+def test_delete_user(client, user, token):
+    response = client.delete(
+        f'/users/{user.id}', headers={'Authorization': f'Bearer {token}'}
+    )
     assert response.json() == {
         'id': 1,
         'username': 'test',
@@ -181,9 +184,11 @@ def test_delete_user(client, user):
     }
 
 
-def test_delete_user__should_return_not_found(client):
-    response = client.delete('/users/2')
-    assert response.status_code == HTTPStatus.NOT_FOUND
+def test_delete_user_should_return_not_found(client, token):
+    response = client.delete(
+        '/users/2', headers={'Authorization': f'Bearer {token}'}
+    )
+    assert response.status_code == HTTPStatus.FORBIDDEN
 
 
 def test_get_token(client, user):
@@ -194,3 +199,11 @@ def test_get_token(client, user):
     assert response.status_code == HTTPStatus.OK
     assert token['token_type'] == 'Bearer'
     assert 'access_token' in token.keys()
+
+
+def test_invalid_token(client):
+    response = client.get(
+        '/users', headers={'Authorization': 'Bearer <invalid_token>'}
+    )
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'detail': 'could not validate credentials'}
