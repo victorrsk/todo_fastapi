@@ -55,7 +55,7 @@ def get_current_user(
     )
     try:
         payload = decode(token, SECRET_KEY, ALGORITHM)
-        subject_email = payload['sub']
+        subject_email = payload.get('sub')
         if not subject_email:
             raise credentials_exception
     except DecodeError:

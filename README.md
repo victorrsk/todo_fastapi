@@ -22,3 +22,7 @@
   - Integração de todas as rotas da API com banco de dados (SQLite3)
   - Testes de todas as rotas e situações de conflito entre dados
   - Introdução a injeção de dependências
+- **Aula 6**
+  - Introdução a autenticação com JWT e autorização
+  - Criação e validação de tokens (incompleto)
+  - Adaptação dos testes para uso com token e novos testes para validação e casos de erro do token
