@@ -26,3 +26,6 @@
   - Introdução a autenticação com JWT e autorização
   - Criação e validação de tokens (incompleto)
   - Adaptação dos testes para uso com token e novos testes para validação e casos de erro do token
+- **Aula 6**
+  - Refatoração da estrutura da API
+  - Introdução a routers do FastAPI

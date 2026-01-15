@@ -42,7 +42,7 @@ addopts = '-p no:warnings'
 [tool.taskipy.tasks]
 lint = 'ruff check .'
 format_imp = 'ruff check --fix'
-format = 'ruff format'
+format = 'ruff format && ruff check --fix'
 run = 'fastapi dev main/app.py'
 run_net = 'fastapi dev main/app.py --host 0.0.0.0'
 pre_test = 'task format && task format_imp'

@@ -93,7 +93,8 @@ def token(client, user):
     # automaticamente insere um registro no banco de dados
     # usando a fixture user
     response = client.post(
-        '/token', data={'username': user.email, 'password': user.clean_pwd}
+        '/auth/token',
+        data={'username': user.email, 'password': user.clean_pwd},
     )
 
     _token = response.json()['access_token']

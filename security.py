@@ -42,7 +42,7 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 
-oauth2 = OAuth2PasswordBearer(tokenUrl='/token')
+oauth2 = OAuth2PasswordBearer(tokenUrl='/auth/token')
 
 
 def get_current_user(
