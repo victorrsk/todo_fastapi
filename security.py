@@ -11,8 +11,13 @@ from sqlalchemy.orm import Session
 
 from database import get_session
 from models.models_db import User
+from settings import Settings
 
 pwd_context = PasswordHash.recommended()
+
+TOKEN_EXPIRE_TIME = Settings().TOKEN_EXPIRE_TIME
+SECRET_KEY = Settings().SECRET_KEY
+ALGORITHM = Settings().ALGORITHM
 
 
 def get_pwd_hash(pwd: str):
@@ -21,12 +26,6 @@ def get_pwd_hash(pwd: str):
 
 def verify_pwd(plain_pwd: str, hashed_pwd: str):
     return pwd_context.verify(plain_pwd, hashed_pwd)
-
-
-# tempo em minutos
-TOKEN_EXPIRE_TIME = 30
-SECRET_KEY = 'key123'
-ALGORITHM = 'HS256'
 
 
 def create_access_token(data: dict):

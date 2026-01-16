@@ -7,6 +7,6 @@ class Settings(BaseSettings):
     )
 
     DATABASE_URL: str = ''
-
-
-print(Settings().DATABASE_URL)
+    TOKEN_EXPIRE_TIME: int = 0
+    ALGORITHM: str = ''
+    SECRET_KEY: str = ''

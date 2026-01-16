@@ -43,3 +43,9 @@ HTML_HELLO = """
 class TokenSchema(BaseModel):
     access_token: str
     token_type: str
+
+
+class FilterPage(BaseModel):
+    # indica limite de registros por página e de onde começa
+    limit: int = 10
+    offset: int = 0
