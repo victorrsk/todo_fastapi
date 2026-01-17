@@ -1,7 +1,8 @@
 from http import HTTPStatus
 
 from fastapi import HTTPException
-from sqlalchemy import create_engine, select
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session
 
 from models.models_db import User
@@ -9,15 +10,15 @@ from schema.schemas import UserSchema
 from settings import Settings
 
 
-def get_session():
+async def get_session():
     """_summary_
 
     Yields:
         Session: give an session object used for making database oporations
     """
-    engine = create_engine(Settings().DATABASE_URL)
+    engine = create_async_engine(Settings().DATABASE_URL)
 
-    with Session(engine) as session:
+    async with AsyncSession(engine) as session:
         yield session
 
 
