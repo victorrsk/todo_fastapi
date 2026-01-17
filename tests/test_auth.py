@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+import pytest
 from jwt import decode
 
 from security import ALGORITHM, SECRET_KEY, create_access_token

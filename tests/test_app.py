@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+import pytest
+
 from schema.schemas import UserPublic
 
 
@@ -47,7 +49,7 @@ def test_create_user_integrity_error_email(client, user):
     assert response.status_code == HTTPStatus.CONFLICT
 
 
-def test_read_users_with_user(client, user, token):
+def test_read_users(client, user, token):
     response = client.get(
         '/users/', headers={'Authorization': f'Bearer {token}'}
     )

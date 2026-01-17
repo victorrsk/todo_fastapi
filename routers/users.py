@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_session, raise_unique_fields_error, search_id
 from models.models_db import User
@@ -15,27 +15,27 @@ from security import (
 
 router = APIRouter(prefix='/users', tags=['users'])
 
-T_Session = Annotated[Session, Depends(get_session)]
+T_Session = Annotated[AsyncSession, Depends(get_session)]
 T_CurrentUser = Annotated[User, Depends(get_current_user)]
 T_FilterPage = Annotated[FilterPage, Query()]
 
 
 @router.get('/', status_code=HTTPStatus.OK, response_model=UserList)
-def read_users(
+async def read_users(
     # traz no máximo 10 registros
     session: T_Session,
     current_user: T_CurrentUser,
     filter_page: T_FilterPage,
 ):
-    users = session.scalars(
+    users = await session.scalars(
         select(User).offset(filter_page.offset).limit(filter_page.limit)
     )
     return {'users': users}
 
 
 @router.get('/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
-def read_user(user_id: int, session: T_Session):
-    user_db = search_id(user_id, session)
+async def read_user(user_id: int, session: T_Session):
+    user_db = await search_id(user_id, session)
     if user_db:
         user = User(
             id=user_db.id, username=user_db.username, email=user_db.email
@@ -44,9 +44,9 @@ def read_user(user_id: int, session: T_Session):
 
 
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
-def create_user(user: UserSchema, session: T_Session):
+async def create_user(user: UserSchema, session: T_Session):
     # básico
-    user_db = session.scalar(
+    user_db = await session.scalar(
         select(User).where(
             (User.username == user.username) | (User.email == user.email)
         )
@@ -60,13 +60,13 @@ def create_user(user: UserSchema, session: T_Session):
         password=get_pwd_hash(user.password),
     )
     session.add(user_db)
-    session.commit()
-    session.refresh(user_db)
+    await session.commit()
+    await session.refresh(user_db)
     return user_db
 
 
 @router.put('/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
-def update_user(
+async def update_user(
     user_id: int,
     user: UserSchema,
     session: T_Session,
@@ -76,7 +76,7 @@ def update_user(
         raise HTTPException(
             detail='not enough permission', status_code=HTTPStatus.FORBIDDEN
         )
-    test_user = session.scalar(
+    test_user = await session.scalar(
         select(User).where(
             ((User.username == user.username) | (User.email == user.email))
             & (User.id != user_id)
@@ -91,15 +91,17 @@ def update_user(
     current_user.password = get_pwd_hash(user.password)
 
     session.add(current_user)
-    session.commit()
-    session.refresh(current_user)
+
+    await session.commit()
+    await session.refresh(current_user)
+
     return current_user
 
 
 @router.delete(
     '/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
 )
-def delete_user(
+async def delete_user(
     user_id: int,
     session: T_Session,
     current_user: T_CurrentUser,
@@ -109,7 +111,7 @@ def delete_user(
             detail='not enough permission', status_code=HTTPStatus.FORBIDDEN
         )
 
-    session.delete(current_user)
-    session.commit()
+    await session.delete(current_user)
+    await session.commit()
 
     return current_user

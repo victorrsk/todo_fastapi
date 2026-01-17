@@ -2,9 +2,10 @@ from contextlib import contextmanager
 from datetime import datetime
 
 import pytest
+import pytest_asyncio
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import Session
+from sqlalchemy import event
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.pool import StaticPool
 
 from database import get_session
@@ -27,21 +28,22 @@ def client(session):
     app.dependency_overrides.clear()
 
 
-# fixture para criação de tabela e abertura de session para operações no bd
-@pytest.fixture
-def session():
-    engine = create_engine(
-        'sqlite:///:memory:',
+@pytest_asyncio.fixture
+async def session():
+    # se conecta ao banco, cria e apaga tabela em runtime do teste
+    engine = create_async_engine(
+        'sqlite+aiosqlite:///:memory:',
         connect_args={'check_same_thread': False},
         poolclass=StaticPool,
     )
-    Base.metadata.create_all(engine)
+    async with engine.begin() as eng:
+        await eng.run_sync(Base.metadata.create_all)
 
-    with Session(engine) as session:
+    async with AsyncSession(engine) as session:
         yield session
 
-    Base.metadata.drop_all(engine)
-    engine.dispose()
+    async with engine.begin() as eng:
+        await eng.run_sync(Base.metadata.drop_all)
 
 
 # usado para inserir um created_at "falso" no bd
@@ -68,8 +70,8 @@ def mock_db_time():
     return _mock_db_time
 
 
-@pytest.fixture
-def user(session):
+@pytest_asyncio.fixture
+async def user(session):
 
     password = 'test123'
 
@@ -80,8 +82,8 @@ def user(session):
     )
 
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
     # salva a senha limpa para comparar com o hash nos testes de token
     user.clean_pwd = password
 

@@ -46,7 +46,7 @@ def raise_unique_fields_error(user: UserSchema, user_db: User):
         )
 
 
-def search_id(user_id: int, session: Session):
+def search_id(user_id: int, session: Session | AsyncSession):
     """_summary_
 
     Args:
