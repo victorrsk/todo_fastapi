@@ -52,3 +52,6 @@ pre_test = 'task format && task format_imp'
 test = 'pytest -s -x --cov=. -vv'
 post_test = 'coverage html'
 brute_test = 'pytest -s -x --cov=. -vv' 
+
+[tool.coverage.run]
+concurrency = ["thread", "greenlet"]

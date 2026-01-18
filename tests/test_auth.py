@@ -1,6 +1,5 @@
 from http import HTTPStatus
 
-import pytest
 from jwt import decode
 
 from security import ALGORITHM, SECRET_KEY, create_access_token
@@ -45,7 +44,7 @@ def test_no_email_in_token_payload(client):
     assert response.json() == {'detail': 'could not validate credentials'}
 
 
-def test_nonexistent_email_in_token(client):
+def test_nonexistent_email_in_db(client):
     data = {'sub': 'nonexistent@email.com'}
     token = create_access_token(data=data)
 
@@ -54,3 +53,22 @@ def test_nonexistent_email_in_token(client):
     )
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {'detail': 'could not validate credentials'}
+
+
+def test_nonexistent_email_in_token(client):
+    response = client.post(
+        '/auth/token',
+        data={'username': 'nonexistent@email.com', 'password': 'test123'},
+    )
+    assert response.json() == {'detail': 'incorrect email or password'}
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_incorrect_clean_password_in_token(client, user):
+    response = client.post(
+        '/auth/token',
+        data={'username': user.email, 'password': 'incorrectpwd'},
+    )
+
+    assert response.json() == {'detail': 'incorrect email or password'}
+    assert response.status_code == HTTPStatus.UNAUTHORIZED

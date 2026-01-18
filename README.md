@@ -29,3 +29,7 @@
 - **Aula 6**
   - Refatoração da estrutura da API
   - Introdução a routers do FastAPI
+- **Aula 7**
+  - Refatoração para código assíncrono
+  - Migrações assíncronas
+  - Banco de dados e testes suportam operações assíncronas

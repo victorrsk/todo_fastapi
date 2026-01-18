@@ -1,7 +1,5 @@
 from http import HTTPStatus
 
-import pytest
-
 from schema.schemas import UserPublic
 
 
@@ -131,8 +129,12 @@ def test_read_user(client, user):
     }
 
 
-def test_read_user_should_return_not_found(client):
+def test_read_user_should_return_not_found(
+    client,
+):
     response = client.get('/users/2')
+
+    assert response.json() == {'detail': 'user not found'}
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
@@ -145,3 +147,45 @@ def test_delete_user(client, user, token):
         'username': 'test',
         'email': 'test@email.com',
     }
+
+
+def test_update_other_user(client, user, token):
+    client.post(
+        '/users',
+        json={
+            'username': 'ana',
+            'email': 'ana@email.com',
+            'password': 'ana123',
+        },
+    )
+
+    response = client.put(
+        '/users/2',
+        json={
+            'username': user.username,
+            'email': user.email,
+            'password': user.password,
+        },
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.json() == {'detail': 'not enough permission'}
+    assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_delete_other_user(client, user, token):
+    client.post(
+        '/users',
+        json={
+            'username': 'ana',
+            'email': 'ana@email.com',
+            'password': 'ana123',
+        },
+    )
+
+    response = client.delete(
+        '/users/2', headers={'Authorization': f'Bearer {token}'}
+    )
+
+    assert response.json() == {'detail': 'not enough permission'}
+    assert response.status_code == HTTPStatus.FORBIDDEN

@@ -36,11 +36,13 @@ async def read_users(
 @router.get('/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)
 async def read_user(user_id: int, session: T_Session):
     user_db = await search_id(user_id, session)
-    if user_db:
-        user = User(
-            id=user_db.id, username=user_db.username, email=user_db.email
+
+    if user_db is None:
+        raise HTTPException(
+            detail='user not found', status_code=HTTPStatus.NOT_FOUND
         )
-        return user
+
+    return user_db
 
 
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
