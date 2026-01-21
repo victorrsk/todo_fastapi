@@ -22,7 +22,6 @@ T_FilterPage = Annotated[FilterPage, Query()]
 
 @router.get('/', status_code=HTTPStatus.OK, response_model=UserList)
 async def read_users(
-    # traz no máximo 10 registros
     session: T_Session,
     current_user: T_CurrentUser,
     filter_page: T_FilterPage,

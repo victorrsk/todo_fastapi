@@ -33,3 +33,6 @@
   - Refatoração para código assíncrono
   - Migrações assíncronas
   - Banco de dados e testes suportam operações assíncronas
+- **Aula 8**
+  - Geração de dados de teste com **factory_boy**
+  - Geração de refresh tokens

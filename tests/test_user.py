@@ -149,22 +149,13 @@ def test_delete_user(client, user, token):
     }
 
 
-def test_update_other_user(client, user, token):
-    client.post(
-        '/users',
-        json={
-            'username': 'ana',
-            'email': 'ana@email.com',
-            'password': 'ana123',
-        },
-    )
-
+def test_update_other_user(client, other_user, token):
     response = client.put(
-        '/users/2',
+        f'/users/{other_user.id}',
         json={
-            'username': user.username,
-            'email': user.email,
-            'password': user.password,
+            'username': 'bob',
+            'email': 'bob@email.com',
+            'password': "bob_pwd",
         },
         headers={'Authorization': f'Bearer {token}'},
     )
@@ -173,18 +164,9 @@ def test_update_other_user(client, user, token):
     assert response.status_code == HTTPStatus.FORBIDDEN
 
 
-def test_delete_other_user(client, user, token):
-    client.post(
-        '/users',
-        json={
-            'username': 'ana',
-            'email': 'ana@email.com',
-            'password': 'ana123',
-        },
-    )
-
+def test_delete_other_user(client, other_user, token):
     response = client.delete(
-        '/users/2', headers={'Authorization': f'Bearer {token}'}
+        f'/users/{other_user.id}', headers={'Authorization': f'Bearer {token}'}
     )
 
     assert response.json() == {'detail': 'not enough permission'}
