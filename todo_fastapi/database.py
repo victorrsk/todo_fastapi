@@ -1,13 +1,12 @@
 from http import HTTPStatus
 
 from fastapi import HTTPException
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import Session
-
 from models.models_db import User
 from schema.schemas import UserSchema
 from settings import Settings
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import Session
 
 
 async def get_session():

@@ -1,8 +1,13 @@
 from http import HTTPStatus
 
+from freezegun import freeze_time
 from jwt import decode
-
-from security import ALGORITHM, SECRET_KEY, create_access_token
+from security import (
+    ALGORITHM,
+    SECRET_KEY,
+    TOKEN_EXPIRE_TIME,
+    create_access_token,
+)
 
 
 def test_token_creation():
@@ -55,13 +60,13 @@ def test_nonexistent_email_in_db(client):
     assert response.json() == {'detail': 'could not validate credentials'}
 
 
-def test_nonexistent_email_in_token(client):
+def test_nonexistent_user_in_token(client):
     response = client.post(
         '/auth/token',
         data={'username': 'nonexistent@email.com', 'password': 'test123'},
     )
-    assert response.json() == {'detail': 'incorrect email or password'}
     assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'detail': 'incorrect email or password'}
 
 
 def test_incorrect_clean_password_in_token(client, user):
@@ -72,3 +77,22 @@ def test_incorrect_clean_password_in_token(client, user):
 
     assert response.json() == {'detail': 'incorrect email or password'}
     assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+def test_expired_token_after_time(client, user):
+    with freeze_time('2026-01-01  00:00:00'):
+        response = client.post(
+            '/auth/token',
+            data={'username': user.email, 'password': user.clean_pwd},
+        )
+
+    assert response.status_code == HTTPStatus.OK
+    token = response.json()['access_token']
+
+    with freeze_time(f'2026-01-01 00:{TOKEN_EXPIRE_TIME + 5}:00'):
+        response = client.get(
+            '/users', headers={'Authorization': f'Bearer {token}'}
+        )
+
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'detail': 'could not validate credentials'}

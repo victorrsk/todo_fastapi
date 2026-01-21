@@ -3,17 +3,16 @@ from datetime import datetime
 
 import pytest
 import pytest_asyncio
+from database import get_session
 from factory.base import Factory
 from factory.declarations import LazyAttribute, Sequence
 from fastapi.testclient import TestClient
-from sqlalchemy import event
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.pool import StaticPool
-
-from database import get_session
 from main.app import app
 from models.models_db import Base, User
 from security import get_pwd_hash
+from sqlalchemy import event
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.pool import StaticPool
 
 
 # fixture que retorna um client para testes de rotas da API

@@ -155,7 +155,7 @@ def test_update_other_user(client, other_user, token):
         json={
             'username': 'bob',
             'email': 'bob@email.com',
-            'password': "bob_pwd",
+            'password': 'bob_pwd',
         },
         headers={'Authorization': f'Bearer {token}'},
     )

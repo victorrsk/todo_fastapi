@@ -1,12 +1,9 @@
 from http import HTTPStatus
 from typing import Annotated
 
+from database import get_session
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from database import get_session
 from models.models_db import User
 from schema.schemas import (
     TokenSchema,
@@ -15,6 +12,8 @@ from security import (
     create_access_token,
     verify_pwd,
 )
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 T_Session = Annotated[AsyncSession, Depends(get_session)]

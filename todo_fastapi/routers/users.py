@@ -1,17 +1,16 @@
 from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from database import get_session, raise_unique_fields_error, search_id
+from fastapi import APIRouter, Depends, HTTPException, Query
 from models.models_db import User
 from schema.schemas import FilterPage, UserList, UserPublic, UserSchema
 from security import (
     get_current_user,
     get_pwd_hash,
 )
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix='/users', tags=['users'])
 
