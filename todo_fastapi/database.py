@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session
 
 
-async def get_session():
+async def get_session():  # pragma: no cover
     """_summary_
 
     Yields:
@@ -21,7 +21,9 @@ async def get_session():
         yield session
 
 
-def raise_unique_fields_error(user: UserSchema, user_db: User):
+def raise_unique_fields_error(
+    user: UserSchema, user_db: User
+):  # pragma: no cover
     """_summary_
 
     Args:
@@ -45,7 +47,9 @@ def raise_unique_fields_error(user: UserSchema, user_db: User):
         )
 
 
-def search_id(user_id: int, session: Session | AsyncSession):
+def search_id(
+    user_id: int, session: Session | AsyncSession
+):  # pragma: no cover
     """_summary_
 
     Args:

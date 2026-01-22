@@ -45,7 +45,6 @@ async def read_user(user_id: int, session: T_Session):
 
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
 async def create_user(user: UserSchema, session: T_Session):
-    # básico
     user_db = await session.scalar(
         select(User).where(
             (User.username == user.username) | (User.email == user.email)
