@@ -6,8 +6,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from models.models_db import Base
-from settings import Settings
+from todo_fastapi.models.models_db import Base
+from todo_fastapi.settings import Settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

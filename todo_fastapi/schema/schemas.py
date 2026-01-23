@@ -1,4 +1,5 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from models.models_db import TodoState
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class Message(BaseModel):
@@ -49,3 +50,13 @@ class FilterPage(BaseModel):
     # indica limite de registros por página e de onde começa
     limit: int = 10
     offset: int = 0
+
+
+class TodoSchema(BaseModel):
+    title: str
+    description: str
+    state: TodoState = Field(default=TodoState.todo)
+
+
+class TodoPublic(TodoSchema):
+    id: int
