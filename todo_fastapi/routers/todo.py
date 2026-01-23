@@ -18,6 +18,7 @@ T_FilterPage = Annotated[FilterPage, Query()]
 router = APIRouter(prefix='/todos', tags=['todos'])
 
 
+
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=TodoPublic)
 async def create_todo(
     todo: TodoSchema, session: T_Session, current_user: T_CurrentUser
