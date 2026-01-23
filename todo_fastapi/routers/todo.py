@@ -25,7 +25,7 @@ async def create_todo(
     todo_db = Todo(
         title=todo.title, description=todo.description, state=todo.state
     )
-
+    todo_db.user_id = current_user.id
     session.add(todo_db)
     await session.commit()
     await session.refresh(todo_db)
