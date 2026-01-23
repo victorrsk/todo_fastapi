@@ -36,3 +36,6 @@
 - **Aula 8**
   - Geração de dados de teste com **factory_boy**
   - Geração de refresh tokens
+- **Aula 9**
+  - Endpoints de tarefas
+  - Testes dos endpoints de tarefas

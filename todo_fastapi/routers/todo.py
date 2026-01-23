@@ -8,6 +8,7 @@ from schema.schemas import FilterPage, TodoPublic, TodoSchema
 from security import (
     get_current_user,
 )
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 T_Session = Annotated[AsyncSession, Depends(get_session)]
@@ -32,3 +33,9 @@ async def create_todo(
     await session.refresh(todo_db)
 
     return todo_db
+
+
+'''@router.get('/{user_id}', response_model=TodosList)
+async def read_user_todos(user_id: int, session: T_Session):
+    todos = session.scalars(select(Todo).where(Todo.user_id == user_id))
+    return todos'''

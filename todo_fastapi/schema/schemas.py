@@ -1,4 +1,4 @@
-from models.models_db import TodoState
+from models.models_db import Todo, TodoState
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
@@ -60,3 +60,8 @@ class TodoSchema(BaseModel):
 
 class TodoPublic(TodoSchema):
     id: int
+
+
+'''class TodosList(BaseModel):
+    todos: list[Todo]
+'''
