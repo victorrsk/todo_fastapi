@@ -18,7 +18,6 @@ T_FilterPage = Annotated[FilterPage, Query()]
 router = APIRouter(prefix='/todos', tags=['todos'])
 
 
-
 @router.post('/', status_code=HTTPStatus.CREATED, response_model=TodoPublic)
 async def create_todo(
     todo: TodoSchema, session: T_Session, current_user: T_CurrentUser
@@ -27,6 +26,7 @@ async def create_todo(
         title=todo.title, description=todo.description, state=todo.state
     )
     todo_db.user_id = current_user.id
+
     session.add(todo_db)
     await session.commit()
     await session.refresh(todo_db)
