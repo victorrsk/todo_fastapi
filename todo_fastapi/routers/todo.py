@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import Annotated
 
 from database import get_session
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from models.models_db import Todo, User
 from schema.schemas import (
     FilterPage,
@@ -62,3 +62,25 @@ async def read_todos(
     )
 
     return {'todos': todos.all()}
+
+
+@router.delete('/{todo_id}')
+async def delete_todo(
+    todo_id: int, current_user: T_CurrentUser, session: T_Session
+):
+    todo = await session.scalar(select(Todo).where(Todo.id == todo_id))
+
+    if not todo:
+        raise HTTPException(
+            detail='todo not found', status_code=HTTPStatus.NOT_FOUND
+        )
+
+    if todo.user_id == current_user.id:
+        await session.delete(todo)
+        await session.commit()
+
+        return {'msg': 'deleted'}
+
+    raise HTTPException(
+        detail='not enough permission', status_code=HTTPStatus.FORBIDDEN
+    )

@@ -22,7 +22,7 @@ def test_create_todo(client, token):
     }
 
 
-'''def test_read_todos(client, token):
+"""def test_read_todos(client, token):
     # sem fixture
     client.post(
         '/todos',
@@ -50,7 +50,7 @@ def test_create_todo(client, token):
                 'state': 'todo',
             },
         ]
-    }'''
+    }"""
 
 
 def test__read_todos_factory(todo, client, token):
@@ -97,3 +97,11 @@ async def test_read_todos_should_return_10_todos(session, client, token):
 
     assert response.status_code == HTTPStatus.OK
     assert len(response.json()['todos']) == TODOS_AMOUNT
+
+
+def test_delete_todo(todo, token, client, user):
+    response = client.delete(
+        f'/todos/{user.id}', headers={'Authorization': f'Bearer {token}'}
+    )
+
+    assert response.json() == {'msg': 'deleted'}
