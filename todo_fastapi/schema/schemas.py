@@ -1,4 +1,4 @@
-from models.models_db import Todo, TodoState
+from models.models_db import TodoState
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
@@ -52,6 +52,12 @@ class FilterPage(BaseModel):
     offset: int = 0
 
 
+class FilterTodo(FilterPage):
+    title: str | None = Field(default=None, min_length=3, max_length=40)
+    description: str | None = Field(default=None, min_length=5, max_length=250)
+    state: TodoState | None = None
+
+
 class TodoSchema(BaseModel):
     title: str
     description: str
@@ -62,6 +68,5 @@ class TodoPublic(TodoSchema):
     id: int
 
 
-'''class TodosList(BaseModel):
-    todos: list[Todo]
-'''
+class TodosList(BaseModel):
+    todos: list[TodoPublic]

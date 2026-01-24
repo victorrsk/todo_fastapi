@@ -4,11 +4,12 @@ from datetime import datetime
 import pytest
 import pytest_asyncio
 from database import get_session
+from factory import faker, fuzzy
 from factory.base import Factory
 from factory.declarations import LazyAttribute, Sequence
 from fastapi.testclient import TestClient
 from main.app import app
-from models.models_db import Base, User
+from models.models_db import Base, Todo, TodoState, User
 from security import get_pwd_hash
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -111,6 +112,27 @@ class RandomUser(Factory):
     username = Sequence(lambda num: f'test{num}')
     email = LazyAttribute(lambda obj: f'{obj.username}@email.com')
     password = LazyAttribute(lambda obj: f'{obj.username}_password')
+
+
+class RandomTodo(Factory):
+    class Meta:
+        model = Todo
+
+    title = faker.Faker('text', max_nb_chars=10)
+    description = faker.Faker('text')
+    state = fuzzy.FuzzyChoice(TodoState)
+    user_id = 1
+
+
+@pytest_asyncio.fixture
+async def todo(session):
+    _todo = RandomTodo()
+
+    session.add(_todo)
+    await session.commit()
+    await session.refresh(_todo)
+
+    return _todo
 
 
 @pytest_asyncio.fixture
