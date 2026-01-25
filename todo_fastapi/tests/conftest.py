@@ -119,7 +119,7 @@ class RandomTodo(Factory):
         model = Todo
 
     title = faker.Faker('text', max_nb_chars=10)
-    description = faker.Faker('text')
+    description = faker.Faker('text', max_nb_chars=20)
     state = fuzzy.FuzzyChoice(TodoState)
     user_id = 1
 
@@ -148,3 +148,15 @@ async def other_user(session):
     user.clean_pwd = password
 
     return user
+
+
+@pytest.fixture
+def other_token(other_user, client):
+    response = client.post(
+        '/auth/token',
+        data={'username': other_user.email, 'password': other_user.clean_pwd},
+    )
+
+    _other_token = response.json()['access_token']
+
+    return _other_token

@@ -5,6 +5,8 @@ from factory import faker, fuzzy
 from factory.base import Factory
 from models.models_db import Todo, TodoState
 
+# ---------------------------- testes de create ---------------------------
+
 
 def test_create_todo(client, token):
     response = client.post(
@@ -20,6 +22,9 @@ def test_create_todo(client, token):
         'description': 'test',
         'state': 'todo',
     }
+
+
+# ---------------------------- testes de read ---------------------------
 
 
 """def test_read_todos(client, token):
@@ -53,7 +58,7 @@ def test_create_todo(client, token):
     }"""
 
 
-def test__read_todos_factory(todo, client, token):
+def test_read_todos_factory(todo, client, token):
     # com fixture
     response = client.get(
         '/todos', headers={'Authorization': f'Bearer {token}'}
@@ -63,7 +68,7 @@ def test__read_todos_factory(todo, client, token):
     assert response.json() == {
         'todos': [
             {
-                'id': 1,
+                'id': todo.id,
                 'title': todo.title,
                 'description': todo.description,
                 'state': todo.state,
@@ -99,9 +104,88 @@ async def test_read_todos_should_return_10_todos(session, client, token):
     assert len(response.json()['todos']) == TODOS_AMOUNT
 
 
+# ---------------------------- testes de filtro ---------------------------
+
+
+def test_title_in_todo_filter(client, token, todo):
+    response = client.get(
+        f'/todos?title={todo.title}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'todos': [
+            {
+                'id': 1,
+                'title': todo.title,
+                'description': todo.description,
+                'state': todo.state,
+            }
+        ]
+    }
+
+
+def test_description_in_todo_filter(client, token, todo):
+    response = client.get(
+        f'/todos?description={todo.description}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'todos': [
+            {
+                'id': 1,
+                'title': todo.title,
+                'description': todo.description,
+                'state': todo.state,
+            }
+        ]
+    }
+
+
+def test_state_in_todo_filter(client, token, todo):
+    response = client.get(
+        f'/todos?state={todo.state.value}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.json() == {
+        'todos': [
+            {
+                'id': 1,
+                'title': todo.title,
+                'description': todo.description,
+                'state': todo.state,
+            }
+        ]
+    }
+
+
+# ---------------------------- testes de delete ---------------------------
+
+
 def test_delete_todo(todo, token, client, user):
     response = client.delete(
         f'/todos/{user.id}', headers={'Authorization': f'Bearer {token}'}
     )
 
-    assert response.json() == {'msg': 'deleted'}
+    assert response.json() == {'message': 'deleted'}
+
+
+def test_delete_nonexistent_todo(client, token):
+    response = client.delete(
+        '/todos/2', headers={'Authorization': f'Bearer {token}'}
+    )
+
+    assert response.json() == {'detail': 'todo not found'}
+
+
+def test_delete_other_user_todo(client, todo, token, other_token):
+    response = client.delete(
+        'todos/1', headers={'Authorization': f'Bearer {other_token}'}
+    )
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {'detail': 'not enough permission'}

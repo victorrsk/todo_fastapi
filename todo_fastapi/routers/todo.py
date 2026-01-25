@@ -7,6 +7,7 @@ from models.models_db import Todo, User
 from schema.schemas import (
     FilterPage,
     FilterTodo,
+    Message,
     TodoPublic,
     TodoSchema,
     TodosList,
@@ -64,7 +65,7 @@ async def read_todos(
     return {'todos': todos.all()}
 
 
-@router.delete('/{todo_id}')
+@router.delete('/{todo_id}', status_code=HTTPStatus.OK, response_model=Message)
 async def delete_todo(
     todo_id: int, current_user: T_CurrentUser, session: T_Session
 ):
@@ -79,7 +80,7 @@ async def delete_todo(
         await session.delete(todo)
         await session.commit()
 
-        return {'msg': 'deleted'}
+        return {'message': 'deleted'}
 
     raise HTTPException(
         detail='not enough permission', status_code=HTTPStatus.FORBIDDEN
