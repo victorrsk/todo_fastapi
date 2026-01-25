@@ -3,7 +3,7 @@ from typing import Annotated
 
 from database import get_session
 from fastapi import APIRouter, Depends, HTTPException, Query
-from models.models_db import Todo, User
+from models.models_db import Todo, TodoState, User
 from schema.schemas import (
     FilterPage,
     FilterTodo,
@@ -11,6 +11,7 @@ from schema.schemas import (
     TodoPublic,
     TodoSchema,
     TodosList,
+    TodoUpdate,
 )
 from security import (
     get_current_user,
@@ -63,6 +64,43 @@ async def read_todos(
     )
 
     return {'todos': todos.all()}
+
+
+@router.patch(
+    '/{todo_id}', status_code=HTTPStatus.OK, response_model=TodoPublic
+)
+async def update_todo(
+    todo_id: int,
+    todo: TodoUpdate,
+    current_user: T_CurrentUser,
+    session: T_Session,
+):
+    todo_db = await session.scalar(select(Todo).where(Todo.id == todo_id))
+
+    if not todo_db:
+        raise HTTPException(
+            detail='todo not found', status_code=HTTPStatus.NOT_FOUND
+        )
+
+    if todo_db.user_id == current_user.id:
+        for key, value in todo.model_dump(exclude_unset=True).items():
+            # valida se o valor de state recebido pela API é válido
+            if key == 'state' and value not in TodoState:
+                raise HTTPException(
+                    detail='invalid value for todo',
+                    status_code=HTTPStatus.BAD_REQUEST,
+                )
+            setattr(todo_db, key, value)
+
+        session.add(todo_db)
+        await session.commit()
+        await session.refresh(todo_db)
+
+        return todo_db
+
+    raise HTTPException(
+        detail='not enough permission', status_code=HTTPStatus.FORBIDDEN
+    )
 
 
 @router.delete('/{todo_id}', status_code=HTTPStatus.OK, response_model=Message)

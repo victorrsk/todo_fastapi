@@ -70,3 +70,9 @@ class TodoPublic(TodoSchema):
 
 class TodosList(BaseModel):
     todos: list[TodoPublic]
+
+
+class TodoUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    state: str | None = None

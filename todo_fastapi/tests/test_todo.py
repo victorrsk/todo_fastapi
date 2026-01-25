@@ -189,3 +189,46 @@ def test_delete_other_user_todo(client, todo, token, other_token):
 
     assert response.status_code == HTTPStatus.FORBIDDEN
     assert response.json() == {'detail': 'not enough permission'}
+
+
+# ---------------------------- testes de patch ---------------------------
+
+
+def test_patch_todo(client, token, todo):
+    response = client.patch(
+        f'/todos/{todo.id}',
+        json={'title': 'new_title'},
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()['title'] == 'new_title'
+
+
+def test_patch_nonexistent_todo(client, token):
+    response = client.patch(
+        '/todos/2', json={}, headers={'Authorization': f'Bearer {token}'}
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'todo not found'}
+
+
+def test_patch_invalid_state_for_todo(client, token, todo):
+    response = client.patch(
+        f'/todos/{todo.id}',
+        json={'state': 'invalid_state'},
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.json() == {'detail': 'invalid value for todo'}
+
+
+def test_patch_other_user_todo(client, todo, user, other_token):
+    response = client.patch(
+        f'/todos/{todo.id}',
+        json={},
+        headers={'Authorization': f'Bearer {other_token}'},
+    )
+
+    assert response.json() == {'detail': 'not enough permission'}
