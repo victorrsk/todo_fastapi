@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from models.models_db import TodoState
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -18,6 +20,8 @@ class UserPublic(BaseModel):
     email: EmailStr
     # valida os dados via atributos
     model_config = ConfigDict(from_attributes=True)
+    created_at: datetime
+    updated_at: datetime
 
 
 class UserDB(UserSchema):
@@ -66,6 +70,8 @@ class TodoSchema(BaseModel):
 
 class TodoPublic(TodoSchema):
     id: int
+    created_at: datetime
+    updated_at: datetime
 
 
 class TodosList(BaseModel):

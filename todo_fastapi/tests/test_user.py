@@ -3,7 +3,7 @@ from http import HTTPStatus
 from schema.schemas import UserPublic
 
 
-def test_create_user(client):
+def test_create_user(client, mock_db_time):
     response = client.post(
         '/users',
         json={
