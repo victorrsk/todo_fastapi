@@ -21,6 +21,8 @@ def test_create_todo(client, token):
         'title': 'test',
         'description': 'test',
         'state': 'todo',
+        'created_at': response.json()['created_at'],
+        'updated_at': response.json()['updated_at'],
     }
 
 
@@ -58,7 +60,7 @@ def test_create_todo(client, token):
     }"""
 
 
-def test_read_todos_factory(todo, client, token):
+def test_read_todos_factory(todo, client, token, fixed_time_iso):
     # com fixture
     response = client.get(
         '/todos', headers={'Authorization': f'Bearer {token}'}
@@ -71,7 +73,9 @@ def test_read_todos_factory(todo, client, token):
                 'id': todo.id,
                 'title': todo.title,
                 'description': todo.description,
-                'state': todo.state,
+                'state': todo.state.value,
+                'created_at': fixed_time_iso,
+                'updated_at': fixed_time_iso,
             }
         ]
     }
@@ -107,7 +111,7 @@ async def test_read_todos_should_return_10_todos(session, client, token):
 # ---------------------------- testes de filtro ---------------------------
 
 
-def test_title_in_todo_filter(client, token, todo):
+def test_title_in_todo_filter(client, token, todo, fixed_time_iso):
     response = client.get(
         f'/todos?title={todo.title}',
         headers={'Authorization': f'Bearer {token}'},
@@ -121,12 +125,14 @@ def test_title_in_todo_filter(client, token, todo):
                 'title': todo.title,
                 'description': todo.description,
                 'state': todo.state,
+                'created_at': fixed_time_iso,
+                'updated_at': fixed_time_iso,
             }
         ]
     }
 
 
-def test_description_in_todo_filter(client, token, todo):
+def test_description_in_todo_filter(client, token, todo, fixed_time_iso):
     response = client.get(
         f'/todos?description={todo.description}',
         headers={'Authorization': f'Bearer {token}'},
@@ -140,12 +146,14 @@ def test_description_in_todo_filter(client, token, todo):
                 'title': todo.title,
                 'description': todo.description,
                 'state': todo.state,
+                'created_at': fixed_time_iso,
+                'updated_at': fixed_time_iso,
             }
         ]
     }
 
 
-def test_state_in_todo_filter(client, token, todo):
+def test_state_in_todo_filter(client, token, todo, fixed_time_iso):
     response = client.get(
         f'/todos?state={todo.state.value}',
         headers={'Authorization': f'Bearer {token}'},
@@ -158,6 +166,8 @@ def test_state_in_todo_filter(client, token, todo):
                 'title': todo.title,
                 'description': todo.description,
                 'state': todo.state,
+                'created_at': fixed_time_iso,
+                'updated_at': fixed_time_iso,
             }
         ]
     }

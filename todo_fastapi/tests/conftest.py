@@ -15,6 +15,8 @@ from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.pool import StaticPool
 
+# -------------------------------DB_connection---------------------------------
+
 
 # fixture que retorna um client para testes de rotas da API
 @pytest.fixture
@@ -48,6 +50,9 @@ async def session():
         await eng.run_sync(Base.metadata.drop_all)
 
 
+# ------------------------------Mock_db_time-----------------------------------
+
+
 # usado para inserir um created_at "falso" no bd
 @contextmanager
 def _mock_db_time(model, time=datetime(2026, 1, 1)):
@@ -72,37 +77,23 @@ def mock_db_time():
     return _mock_db_time
 
 
-@pytest_asyncio.fixture
-async def user(session):
-
-    password = 'test123'
-
-    user = User(
-        username='test',
-        email='test@email.com',
-        password=get_pwd_hash(password),
-    )
-
-    session.add(user)
-    await session.commit()
-    await session.refresh(user)
-    # salva a senha limpa para comparar com o hash nos testes de token
-    user.clean_pwd = password
-
-    return user
+# ---------------------------------Fixed_time-------------------------------
 
 
 @pytest.fixture
-def token(client, user):
-    # automaticamente insere um registro no banco de dados
-    # usando a fixture user
-    response = client.post(
-        '/auth/token',
-        data={'username': user.email, 'password': user.clean_pwd},
-    )
+def fixed_time():
+    # usar dentro da fixture todo e user
+    # o datetime padrão é igual ao do mock_db_time
+    return datetime(2026, 1, 1)
 
-    _token = response.json()['access_token']
-    return _token
+
+@pytest.fixture
+def fixed_time_iso(fixed_time):
+    # retorna fixed_time em string, usar em comparações
+    return fixed_time.isoformat()
+
+
+# -------------------------------Factories---------------------------------
 
 
 class RandomUser(Factory):
@@ -124,15 +115,43 @@ class RandomTodo(Factory):
     user_id = 1
 
 
+# ---------------------------------Todo----------------------------------------
+
+
 @pytest_asyncio.fixture
-async def todo(session):
-    _todo = RandomTodo()
+async def todo(session, fixed_time):
+    _todo = RandomTodo(created_at=fixed_time, updated_at=fixed_time)
 
     session.add(_todo)
     await session.commit()
     await session.refresh(_todo)
 
     return _todo
+
+
+# -------------------------------User---------------------------------
+
+
+@pytest_asyncio.fixture
+async def user(session, fixed_time):
+
+    password = 'test123'
+
+    user = User(
+        username='test',
+        email='test@email.com',
+        password=get_pwd_hash(password),
+        created_at=fixed_time,
+        updated_at=fixed_time,
+    )
+
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+    # salva a senha limpa para comparar com o hash nos testes de token
+    user.clean_pwd = password
+
+    return user
 
 
 @pytest_asyncio.fixture
@@ -148,6 +167,22 @@ async def other_user(session):
     user.clean_pwd = password
 
     return user
+
+
+# -------------------------------Token-----------------------------------
+
+
+@pytest.fixture
+def token(client, user):
+    # automaticamente insere um registro no banco de dados
+    # usando a fixture user
+    response = client.post(
+        '/auth/token',
+        data={'username': user.email, 'password': user.clean_pwd},
+    )
+
+    _token = response.json()['access_token']
+    return _token
 
 
 @pytest.fixture

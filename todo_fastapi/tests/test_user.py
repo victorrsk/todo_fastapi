@@ -1,9 +1,7 @@
 from http import HTTPStatus
 
-from schema.schemas import UserPublic
 
-
-def test_create_user(client, mock_db_time):
+def test_create_user(client):
     response = client.post(
         '/users',
         json={
@@ -17,6 +15,8 @@ def test_create_user(client, mock_db_time):
         'id': 1,
         'username': 'victor',
         'email': 'victor@email.com',
+        'created_at': response.json()['created_at'],
+        'updated_at': response.json()['updated_at'],
     }
     assert response.status_code == HTTPStatus.CREATED
 
@@ -47,18 +47,27 @@ def test_create_user_integrity_error_email(client, user):
     assert response.status_code == HTTPStatus.CONFLICT
 
 
-def test_read_users(client, user, token):
+def test_read_users(client, user, token, fixed_time_iso):
     response = client.get(
         '/users/', headers={'Authorization': f'Bearer {token}'}
     )
     # valida o user de acordo com o schema de UserPublic
     # e converte em um dicionário
-    user_schema = UserPublic.model_validate(user).model_dump()
-    assert response.json() == {'users': [user_schema]}
+    assert response.json() == {
+        'users': [
+            {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'created_at': fixed_time_iso,
+                'updated_at': fixed_time_iso,
+            }
+        ]
+    }
     assert response.status_code == HTTPStatus.OK
 
 
-def test_update_user(client, user, token):
+def test_update_user(client, user, token, fixed_time_iso):
     response = client.put(
         '/users/1',
         json={
@@ -72,6 +81,8 @@ def test_update_user(client, user, token):
         'id': 1,
         'username': 'new_test',
         'email': 'new_email@email.com',
+        'created_at': fixed_time_iso,
+        'updated_at': response.json()['updated_at'],
     }
     assert response.status_code == HTTPStatus.OK
 
@@ -120,12 +131,14 @@ def test_update_user_integrity_error_email(client, user, token):
     assert response.json() == {'detail': 'email already in use'}
 
 
-def test_read_user(client, user):
+def test_read_user(client, user, fixed_time_iso):
     response = client.get(f'/users/{user.id}')
     assert response.json() == {
         'id': 1,
         'username': 'test',
         'email': 'test@email.com',
+        'created_at': fixed_time_iso,
+        'updated_at': fixed_time_iso,
     }
 
 
@@ -138,7 +151,7 @@ def test_read_user_should_return_not_found(
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-def test_delete_user(client, user, token):
+def test_delete_user(client, user, token, fixed_time_iso):
     response = client.delete(
         f'/users/{user.id}', headers={'Authorization': f'Bearer {token}'}
     )
@@ -146,6 +159,8 @@ def test_delete_user(client, user, token):
         'id': 1,
         'username': 'test',
         'email': 'test@email.com',
+        'created_at': fixed_time_iso,
+        'updated_at': fixed_time_iso,
     }
 
 
