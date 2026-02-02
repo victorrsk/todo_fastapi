@@ -1,3 +1,5 @@
+import asyncio
+import sys
 from contextlib import contextmanager
 from datetime import datetime
 
@@ -13,7 +15,11 @@ from models.models_db import Base, Todo, TodoState, User
 from security import get_pwd_hash
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.pool import StaticPool
+from testcontainers.postgres import PostgresContainer
+
+if sys.platform.startswith('win'):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 
 # -------------------------------DB_connection---------------------------------
 
@@ -32,20 +38,27 @@ def client(session):
     app.dependency_overrides.clear()
 
 
+@pytest.fixture(scope='session')
+def engine():
+    # o escopo "session" define que essa fixture será executada uma única vez
+
+    # sobe um container com postgres para ser executado durante os testes
+    with PostgresContainer(
+        image='postgres:latest', port=5432, driver='psycopg'
+    ) as postgres:
+        yield create_async_engine(postgres.get_connection_url())
+
+
 @pytest_asyncio.fixture
-async def session():
-    # se conecta ao banco, cria e apaga tabela em runtime do teste
-    engine = create_async_engine(
-        'sqlite+aiosqlite:///:memory:',
-        connect_args={'check_same_thread': False},
-        poolclass=StaticPool,
-    )
+async def session(engine):
+    # para cada teste, cria as tabelas, roda e apaga as tabelas
+    # cria antes do teste
     async with engine.begin() as eng:
         await eng.run_sync(Base.metadata.create_all)
-
+    # roda no momento do teste
     async with AsyncSession(engine, expire_on_commit=False) as session:
         yield session
-
+    # apaga após o fim do teste
     async with engine.begin() as eng:
         await eng.run_sync(Base.metadata.drop_all)
 
@@ -112,15 +125,16 @@ class RandomTodo(Factory):
     title = faker.Faker('text', max_nb_chars=10)
     description = faker.Faker('text', max_nb_chars=20)
     state = fuzzy.FuzzyChoice(TodoState)
-    user_id = 1
 
 
 # ---------------------------------Todo----------------------------------------
 
 
 @pytest_asyncio.fixture
-async def todo(session, fixed_time):
-    _todo = RandomTodo(created_at=fixed_time, updated_at=fixed_time)
+async def todo(session, user, fixed_time):
+    _todo = RandomTodo(
+        created_at=fixed_time, updated_at=fixed_time, user_id=user.id
+    )
 
     session.add(_todo)
     await session.commit()
