@@ -1,10 +1,13 @@
 from http import HTTPStatus
 from typing import Annotated
 
-from database import get_session
 from fastapi import APIRouter, Depends, HTTPException, Query
-from models.models_db import Todo, TodoState, User
-from schema.schemas import (
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from todo_fastapi.database import get_session
+from todo_fastapi.models.models_db import Todo, TodoState, User
+from todo_fastapi.schema.schemas import (
     FilterPage,
     FilterTodo,
     Message,
@@ -13,11 +16,9 @@ from schema.schemas import (
     TodosList,
     TodoUpdate,
 )
-from security import (
+from todo_fastapi.security import (
     get_current_user,
 )
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 T_Session = Annotated[AsyncSession, Depends(get_session)]
 T_CurrentUser = Annotated[User, Depends(get_current_user)]

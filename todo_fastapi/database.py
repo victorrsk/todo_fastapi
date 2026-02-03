@@ -1,12 +1,13 @@
 from http import HTTPStatus
 
 from fastapi import HTTPException
-from models.models_db import User
-from schema.schemas import UserSchema
-from settings import Settings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session
+
+from todo_fastapi.models.models_db import User
+from todo_fastapi.schema.schemas import UserSchema
+from todo_fastapi.settings import Settings
 
 
 async def get_session():  # pragma: no cover

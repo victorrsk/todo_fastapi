@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from models.models_db import TodoState
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+from todo_fastapi.models.models_db import TodoState
 
 
 class Message(BaseModel):

@@ -1,20 +1,21 @@
 from http import HTTPStatus
 from typing import Annotated
 
-from database import get_session
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from models.models_db import User
-from schema.schemas import (
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from todo_fastapi.database import get_session
+from todo_fastapi.models.models_db import User
+from todo_fastapi.schema.schemas import (
     TokenSchema,
 )
-from security import (
+from todo_fastapi.security import (
     create_access_token,
     get_current_user,
     verify_pwd,
 )
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 

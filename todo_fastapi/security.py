@@ -2,16 +2,17 @@ from datetime import datetime, timedelta
 from http import HTTPStatus
 from zoneinfo import ZoneInfo
 
-from database import get_session
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jwt import DecodeError, decode, encode
 from jwt.exceptions import ExpiredSignatureError
-from models.models_db import User
 from pwdlib import PasswordHash
-from settings import Settings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from todo_fastapi.database import get_session
+from todo_fastapi.models.models_db import User
+from todo_fastapi.settings import Settings
 
 pwd_context = PasswordHash.recommended()
 
