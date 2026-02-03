@@ -39,3 +39,7 @@
 - **Aula 9**
   - Endpoints de tarefas
   - Testes dos endpoints de tarefas
+- **Aula 10**
+  - Migração para postgres
+  - Configuração do container da aplicação
+  - Aplicação Dockerizada
