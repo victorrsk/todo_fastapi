@@ -21,3 +21,8 @@ jobs:
       
       - name: exec testes
         run: uv run task test
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ALGORITHM: ${{ secrets.ALGORITHM }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      TOKEN_EXPIRE_TIME: ${{ secrets.TOKEN_EXPIRE_TIME }}
