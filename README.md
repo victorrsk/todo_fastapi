@@ -26,24 +26,24 @@
   - Introdução a autenticação com JWT e autorização
   - Criação e validação de tokens (incompleto)
   - Adaptação dos testes para uso com token e novos testes para validação e casos de erro do token
-- **Aula 6**
+- **Aula 7**
   - Refatoração da estrutura da API
   - Introdução a routers do FastAPI
-- **Aula 7**
+- **Aula 8**
   - Refatoração para código assíncrono
   - Migrações assíncronas
   - Banco de dados e testes suportam operações assíncronas
-- **Aula 8**
+- **Aula 9**
   - Geração de dados de teste com **factory_boy**
   - Geração de refresh tokens
-- **Aula 9**
+- **Aula 10**
   - Endpoints de tarefas
   - Testes dos endpoints de tarefas
-- **Aula 10**
+- **Aula 11**
   - Migração para postgres
   - Configuração do container da aplicação
   - Aplicação Dockerizada
-- **Aula 11**
-  - Introdução a CI e Github Actions
 - **Aula 12**
+  - Introdução a CI e Github Actions
+- **Aula 13**
   - Deploy
