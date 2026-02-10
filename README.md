@@ -43,3 +43,7 @@
   - Migração para postgres
   - Configuração do container da aplicação
   - Aplicação Dockerizada
+- **Aula 11**
+  - Introdução a CI e Github Actions
+- **Aula 12**
+  - Deploy
